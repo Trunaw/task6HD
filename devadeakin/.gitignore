@@ -1,0 +1,30 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+VITE_FIREBASE_API_KEY=AIzaSyCAnIsLy5-CBaCf2vIw_Cv2WpYp_fu7utk
+VITE_FIREBASE_AUTH_DOMAIN=dev-deakin-ff7b0.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=dev-deakin-ff7b0
+VITE_FIREBASE_STORAGE_BUCKET=dev-deakin-ff7b0.firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID=398589703327
+VITE_FIREBASE_APP_ID=1:398589703327:web:f090b0bc68495e6e249eaa
