@@ -3,9 +3,7 @@ import { collection, addDoc, query, orderBy, onSnapshot } from 'firebase/firesto
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 import { db, storage } from '../../firebase'
 import { v4 as uuidv4 } from 'uuid'
-import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import { increment } from 'firebase/firestore'
 import VideoCard from '../../components/VideoCard'
 
 export default function Tutorials() {
@@ -26,75 +24,34 @@ export default function Tutorials() {
 
   // Handle upload
   const handleUpload = async () => {
-    console.log("👉 Upload button clicked")
-
-    if (loading) {
-      console.warn("⚠️ Still checking login state")
-      return alert('Please wait, checking login...')
-    }
-    if (!user) {
-      console.warn("⚠️ No user logged in")
-      return alert('Login to upload')
-    }
-    if (!file) {
-      console.warn("⚠️ No file selected")
-      return alert('Select a video file')
-    }
+    if (loading) return alert('Please wait, checking login...')
+    if (!user) return alert('Login to upload')
+    if (!file) return alert('Select a video file')
 
     // File validation
     const maxSize = 100 * 1024 * 1024 // 100MB
-    if (file.size > maxSize) {
-      console.warn("⚠️ File too large:", file.size)
-      return alert('File is too large. Maximum size is 100MB.')
-    }
-
-    if (!file.type.startsWith('video/')) {
-      console.warn("⚠️ Invalid file type:", file.type)
-      return alert('Please select a video file.')
-    }
-
-    console.log("✅ User:", user.email)
-    console.log("✅ File selected:", file.name, file.type, `${(file.size / 1024 / 1024).toFixed(2)}MB`)
+    if (file.size > maxSize) return alert('File too large. Max size 100MB.')
+    if (!file.type.startsWith('video/')) return alert('Please select a video file.')
 
     const id = uuidv4()
-    const fileName = `${id}-${file.name}`.replace(/[^a-zA-Z0-9.-]/g, '_') // Sanitize filename
+    const fileName = `${id}-${file.name}`.replace(/[^a-zA-Z0-9.-]/g, '_')
     const storageRef = ref(storage, `tutorials/${fileName}`)
-    console.log("✅ Storage path:", `tutorials/${fileName}`)
     
     const uploadTask = uploadBytesResumable(storageRef, file)
-
-    setUploadSuccess(false) // reset before new upload
+    setUploadSuccess(false)
 
     uploadTask.on(
       'state_changed',
       (snapshot) => {
         const pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
-        console.log(`📤 Upload progress: ${pct}% (${snapshot.bytesTransferred}/${snapshot.totalBytes} bytes)`)
         setUploadProgress(pct)
       },
       (err) => {
-        console.error("❌ Upload error:", err)
-        console.error("❌ Error code:", err.code)
-        console.error("❌ Error message:", err.message)
-        console.error("❌ Error details:", err)
-        
-        let errorMessage = "Upload failed: "
-        if (err.code === 'storage/unauthorized') {
-          errorMessage += "Permission denied. Check Firebase Storage rules."
-        } else if (err.code === 'storage/canceled') {
-          errorMessage += "Upload was canceled."
-        } else if (err.code === 'storage/unknown') {
-          errorMessage += "Unknown error occurred. This might be a CORS issue."
-        } else {
-          errorMessage += err.message
-        }
-        alert(errorMessage)
+        alert("Upload failed: " + err.message)
       },
       async () => {
         try {
           const url = await getDownloadURL(uploadTask.snapshot.ref)
-          console.log("✅ File uploaded, URL:", url)
-
           await addDoc(collection(db, 'tutorials'), {
             title: file.name,
             videoUrl: url,
@@ -106,13 +63,10 @@ export default function Tutorials() {
             createdAt: new Date(),
           })
 
-          console.log("✅ Firestore record created")
-
           setFile(null)
           setUploadProgress(0)
           setUploadSuccess(true)
         } catch (e) {
-          console.error("❌ Firestore write error:", e)
           alert("Error saving video info: " + e.message)
         }
       }
@@ -123,7 +77,6 @@ export default function Tutorials() {
     <div>
       <h1 className="text-xl font-bold mb-4">Tutorials</h1>
 
-      {/* Show logged in user */}
       <div className="mb-4 text-sm text-gray-600">
         {loading
           ? 'Checking login...'
@@ -141,13 +94,7 @@ export default function Tutorials() {
           onChange={(e) => setFile(e.target.files[0])}
           className="mt-2"
         />
-
-        {/* Show selected file name */}
-        {file && (
-          <div className="mt-2 text-sm text-gray-600">
-            Selected: {file.name}
-          </div>
-        )}
+        {file && <div className="mt-2 text-sm text-gray-600">Selected: {file.name}</div>}
 
         <div className="mt-2 flex gap-2 items-center">
           <button className="btn" onClick={handleUpload}>
@@ -158,7 +105,6 @@ export default function Tutorials() {
           )}
         </div>
 
-        {/* Show success message */}
         {uploadSuccess && (
           <div className="mt-2 text-green-600 font-medium">
             ✅ Upload complete! Your video is now live.
@@ -168,26 +114,8 @@ export default function Tutorials() {
 
       {/* Tutorials List */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-  {tutorials.map((t) => (
-    <VideoCard key={t.id} tutorial={t} />
-  ))}
-</div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {tutorials.map((t) => (
-          <Link
-            key={t.id}
-            to={`/tutorials/${t.id}`}
-            className="block bg-white p-3 rounded shadow"
-          >
-            <div className="h-40 bg-gray-200 flex items-center justify-center">
-              Video thumbnail
-            </div>
-            <h4 className="mt-2 font-semibold truncate">{t.title}</h4>
-            <div className="text-sm text-gray-600">{t.uploaderEmail}</div>
-            <div className="text-sm mt-1">
-              Views: {t.views || 0} • Rating: {t.ratingAvg || 0}
-            </div>
-          </Link>
+          <VideoCard key={t.id} tutorial={t} />
         ))}
       </div>
     </div>

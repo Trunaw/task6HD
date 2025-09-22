@@ -6,75 +6,138 @@ export default function Navbar() {
   const { user, logout, loading } = useAuth()
 
   return (
-    <nav className="bg-white shadow-md px-6 py-4 flex flex-col md:flex-row md:justify-between items-center gap-4 md:gap-0">
-      {/* Left side: Brand + Nav links */}
-      <div className="flex items-center gap-6">
-        <Link
-          to="/"
-          className="text-2xl font-bold text-blue-600 hover:text-blue-800"
-        >
-          DEV@Deakin
-        </Link>
+    <>
+      {/* Inline CSS inside the same file */}
+      <style>{`
+        .navbar {
+          background: #fff;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+          padding: 16px 24px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
 
-        <div className="flex gap-4">
-          <Link
-            to="/tutorials"
-            className="text-gray-700 hover:text-blue-600 transition"
-          >
-            Tutorials
-          </Link>
-          <Link
-            to="/projects"
-            className="text-gray-700 hover:text-blue-600 transition"
-          >
-            Projects
-          </Link>
+        .nav-links {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          display: flex;
+          gap: 20px;
+          align-items: center;
+        }
+
+        .nav-links a {
+          text-decoration: none;
+          color: #444;
+          transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+          color: #007bff;
+        }
+
+        .brand {
+          font-size: 1.5rem;
+          font-weight: bold;
+          color: #007bff;
+        }
+
+        .auth-actions {
+          display: flex;
+          gap: 12px;
+          align-items: center;
+        }
+
+        .loading {
+          color: gray;
+          font-size: 0.9rem;
+        }
+
+        .user-info {
+          font-size: 0.9rem;
+          color: #555;
+        }
+
+        .email {
+          font-weight: bold;
+        }
+
+        .btn {
+          padding: 8px 16px;
+          border-radius: 6px;
+          text-decoration: none;
+          font-size: 0.9rem;
+          cursor: pointer;
+          transition: background 0.2s ease, color 0.2s ease;
+          border: none;
+        }
+
+        .login-btn {
+          background: #007bff;
+          color: #fff;
+        }
+        .login-btn:hover {
+          background: #0056b3;
+        }
+
+        .signup-btn {
+          border: 1px solid #007bff;
+          color: #007bff;
+          background: transparent;
+        }
+        .signup-btn:hover {
+          background: #e6f0ff;
+        }
+
+        .logout-btn {
+          background: #dc3545;
+          color: #fff;
+        }
+        .logout-btn:hover {
+          background: #b52a37;
+        }
+      `}</style>
+
+      {/* JSX for Navbar */}
+      <nav className="navbar">
+        <ul className="nav-links">
+          <li>
+            <Link to="/" className="brand">DEV@Deakin</Link>
+          </li>
+          <li>
+            <Link to="/tutorials">Tutorials</Link>
+          </li>
+          <li>
+            <Link to="/projects">Projects</Link>
+          </li>
           {user && (
-            <Link
-              to="/dashboard"
-              className="text-gray-700 hover:text-blue-600 transition"
-            >
-              Dashboard
-            </Link>
+            <li>
+              <Link to="/dashboard">Dashboard</Link>
+            </li>
+          )}
+        </ul>
+
+        <div className="auth-actions">
+          {loading ? (
+            <span className="loading">Checking login...</span>
+          ) : user ? (
+            <>
+              <div className="user-info">
+                Logged in as <span className="email">{user.email}</span>
+              </div>
+              <button className="btn logout-btn" onClick={logout}>
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="btn login-btn">Login</Link>
+              <Link to="/signup" className="btn signup-btn">Sign Up</Link>
+            </>
           )}
         </div>
-      </div>
-
-      {/* Right side: Auth state */}
-      <div className="flex items-center gap-4">
-        {loading ? (
-          <span className="text-gray-500 text-sm">Checking login...</span>
-        ) : user ? (
-          <>
-            {/* Show logged in user */}
-            <div className="text-sm text-gray-600">
-              Logged in as{" "}
-              <span className="font-semibold">{user.email}</span>
-            </div>
-            <button
-              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
-              onClick={logout}
-            >
-              Logout
-            </button>
-          </>
-        ) : (
-          <>
-            <Link
-              to="/login"
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-            >
-              Login
-            </Link>
-            <Link
-              to="/signup"
-              className="border border-blue-600 text-blue-600 px-4 py-2 rounded hover:bg-blue-50 transition"
-            >
-              Sign Up
-            </Link>
-          </>
-        )}
-      </div>
-    </nav>
+      </nav>
+    </>
   )
 }
